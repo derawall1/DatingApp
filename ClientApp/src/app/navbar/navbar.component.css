@@ -18,6 +18,7 @@ a.nav-link.active{
 } */
 a.dropdown-toggle.text-light {
     color: tan  !important;
+    font-weight: bold;
 }
 a.text-light:hover {
     color:tomato  !important;
@@ -33,4 +34,13 @@ a.dropdown-item {
 }
 .dropdown-item:hover{
 color: tomato !important;
+
+}
+
+img{
+    border: 2px solid #fff;
+    max-width: 50px !important;
+    display: inline;
+    border-radius: 50%;
+    margin-right: 5px;
 }

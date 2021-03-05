@@ -6,7 +6,7 @@ import {
   HttpInterceptor
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { NavigationExtras, Router } from '@angular/router';
+import { Router, NavigationExtras } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs/operators';
 
@@ -17,46 +17,48 @@ export class ErrorInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
-      catchError(err => {
-        if (err) {
-
-          switch (err.status) {
+      catchError(error => {
+        if (error) {
+          switch (error.status) {
             case 400:
-
-              if (err.error.errors) {
-                const objErrors = err.error.errors;
+              if (error.error.errors) {
                 const modalStateErrors = [];
-                for (const key in objErrors) {
-                  if (objErrors[key]) {
-                    modalStateErrors.push(objErrors[key]);
+                for (const key in error.error.errors) {
+                  if (error.error.errors[key]) {
+                    modalStateErrors.push(error.error.errors[key])
                   }
                 }
                 throw modalStateErrors.flat();
-
+              } else if (typeof (error.error) === 'object') {
+                this.toastr.error(error.statusText, error.status);
+              } else {
+                this.toastr.error(error.error, error.status);
               }
-              else {
-                this.toastr.error(err.statusText, err.status);
-              }
-
               break;
             case 401:
-              this.toastr.error(err.statusText, err.status);
+              this.toastr.error(error.statusText, error.status);
               break;
             case 404:
-              this.router.navigateByUrl('/not-found')
+              this.router.navigateByUrl('/not-found');
               break;
             case 500:
-              const navigationExtras: NavigationExtras={state:{error: err.error}};
-              this.router.navigateByUrl('/server-error',navigationExtras);
+              const navigationExtras: NavigationExtras = { state: { error: error.error } }
+              this.router.navigateByUrl('/server-error', navigationExtras);
               break;
             default:
-              this.toastr.error("Something unexpected went wrong!");
-              console.log(err);
+              if (error.status >= 200 && error.status < 300) {
+                this.toastr.success(error.error.text);
+                console.log(error);
+              }
+              else {
+                this.toastr.error('Something unexpected went wrong');
+                console.log(error);
+              }
               break;
           }
         }
-        return throwError(err);
+        return throwError(error);
       })
-    );
+    )
   }
 }

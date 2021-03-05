@@ -13,19 +13,18 @@ import { MembersService } from 'src/app/_services/members.service';
   styleUrls: ['./member-edit.component.css']
 })
 export class MemberEditComponent implements OnInit {
-  @ViewChild('editForm') editFrom:NgForm;
+  @ViewChild('editForm') editFrom: NgForm;
   member: Member;
-  user:User;
-  @HostListener("window:beforeunload", ['$event']) unloadNotification($event:any){
-    if(this.editFrom.dirty)
-    {
-      $event.returnValue=true;
+  user: User;
+  @HostListener("window:beforeunload", ['$event']) unloadNotification($event: any) {
+    if (this.editFrom.dirty) {
+      $event.returnValue = true;
     }
   };
 
-  constructor(private accountService: AccountService, private membersService: MembersService, 
-    private toastr: ToastrService) { 
-      this.accountService.currentUser$.pipe(take(1)).subscribe(user => this.user =user);
+  constructor(private accountService: AccountService, private membersService: MembersService,
+    private toastr: ToastrService) {
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => this.user = user);
   }
 
   ngOnInit(): void {
@@ -33,25 +32,22 @@ export class MemberEditComponent implements OnInit {
   }
   // load member data
 
-  loadMember(){
-    this.membersService.getMember(this.user.username).subscribe(member =>{
-      this.member=member;
+  loadMember() {
+    this.membersService.getMember(this.user.username).subscribe(member => {
+      this.member = member;
     });
   }
-// update member data
+  // update member data
 
-updateMember(){
-  this.membersService.updateMember(this.member).subscribe(()=>{
-    //console.log(res);
-    this.toastr.success("Profile has been updated successfully!");
-    this.editFrom.reset(this.member);
-  }, err =>{
-    this.toastr.error(err);
-    console.log(err);
-  });
-    
- 
-}
+  updateMember() {
+    this.membersService.updateMember(this.member).subscribe(() => {
+      //console.log(res);
+      this.toastr.success("Profile has been updated successfully!");
+      this.editFrom.reset(this.member);
+    });
+
+
+  }
 
 
 }

@@ -44,3 +44,31 @@
     border-top: 1px solid #eee;
     padding: 15px 0;
   }
+
+  
+
+/* BS Date Picker styles */
+
+
+.bs-datepicker-head{
+  background-color: #2C3E50 !important;
+  color: tomato !important;
+}
+.theme-default .bs-datepicker-head {
+    background-color: #2C3E50 !important;
+    color: tomato !important;
+}
+
+.bs-datepicker-body table td{
+  color:rgb(72, 134, 103)  !important;
+}
+
+
+ .bs-datepicker-body table td.week span {
+  color: #2C3E50 !important;
+
+ 
+}
+.bs-datepicker-body table td span.disabled, .bs-datepicker-body table td.disabled span{
+  color: red !important;
+}

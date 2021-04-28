@@ -9,6 +9,7 @@ import { PaginatedResult } from '../_models/pagination';
 import { User } from '../_models/user';
 import { UserParams } from '../_models/userParams';
 import { AccountService } from './account.service';
+import { getPaginationHeaders, getPaginationResult } from './paginationHelper';
 
 
 
@@ -47,7 +48,7 @@ export class MembersService {
       return of(response);
     }
 
-    let params = this.getPaginationHeaders(userParams.pageNumber, userParams.pageSize);
+    let params = getPaginationHeaders(userParams.pageNumber, userParams.pageSize);
     params = params.append('minAge', userParams.minAge.toString());
     params = params.append('maxAge', userParams.maxAge.toString());
     params = params.append('gender', userParams.gender);
@@ -55,7 +56,7 @@ export class MembersService {
 
 
 
-    return this.getPaginationResult<Member[]>(this.baseUrl + 'users', params)
+    return getPaginationResult<Member[]>(this.baseUrl + 'users', params, this.http)
       .pipe(map(response => {
         this.memberCash.set(Object.values(userParams).join('-'), response);
         return response;
@@ -97,32 +98,10 @@ export class MembersService {
   }
   // get likes
   getLikes(predicate: string, pageNumber, pageSize) {
-    let params = this.getPaginationHeaders(pageNumber, pageSize);
+    let params = getPaginationHeaders(pageNumber, pageSize);
     params = params.append('predicate', predicate);
-    return this.getPaginationResult<Partial<Member[]>>(this.baseUrl + 'likes', params);
+    return getPaginationResult<Partial<Member[]>>(this.baseUrl + 'likes', params,this.http);
   }
-  // get pagination result
-  private getPaginationResult<T>(url, params) {
-    const paginatedResult: PaginatedResult<T> = new PaginatedResult<T>();
-    return this.http.get<T>(url, { observe: 'response', params }).pipe(
-      map(response => {
-        paginatedResult.result = response.body;
-        if (response.headers.get("Pagination") !== null) {
-          paginatedResult.pagination = JSON.parse(response.headers.get("Pagination"));
-        }
-        return paginatedResult;
-      })
-    );
-  }
-
-  // get the pagination headers
-  private getPaginationHeaders(pageNumber?: number, pageSize?: number) {
-    let params = new HttpParams();
-    if (pageNumber !== null && pageSize !== null) {
-      params = params.append("pageNumber", pageNumber.toString());
-      params = params.append("pageSize", pageSize.toString());
-    }
-    return params;
-  }
+  
 
 }

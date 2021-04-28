@@ -48,7 +48,7 @@ export class ErrorInterceptor implements HttpInterceptor {
             default:
               if (error.status >= 200 && error.status < 300) {
                 this.toastr.success(error.error.text);
-                console.log(error);
+                //console.log(error);
               }
               else {
                 this.toastr.error('Something unexpected went wrong');

@@ -1,8 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgxGalleryAnimation, NgxGalleryImage, NgxGalleryOptions } from '@kolkov/ngx-gallery';
+import { TabDirective, TabsetComponent } from 'ngx-bootstrap/tabs';
 import { Member } from 'src/app/_models/member';
+import { Message } from 'src/app/_models/message';
 import { MembersService } from 'src/app/_services/members.service';
+import { MessageService } from 'src/app/_services/message.service';
 
 @Component({
   selector: 'app-member-detail',
@@ -10,15 +14,24 @@ import { MembersService } from 'src/app/_services/members.service';
   styleUrls: ['./member-detail.component.css']
 })
 export class MemberDetailComponent implements OnInit {
+  @ViewChild('memberTabs', { static: true }) memberTabs: TabsetComponent;
   member: Member;
   galleryOptions: NgxGalleryOptions[];
   galleryImages: NgxGalleryImage[];
-
-  constructor(private membersService: MembersService, private route: ActivatedRoute) { }
+  activeTab: TabDirective;
+  messages: Message[] = [];
+  constructor(private membersService: MembersService, private messageService: MessageService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.loadMember();
-
+    // load members form route resolver
+    this.route.data.subscribe(data => {
+      this.member = data.member;
+    });
+    // get query params from  query string in route
+    this.route.queryParams.subscribe(params => {
+      params.tab ? this.selectTab(params.tab) : this.selectTab(0);
+    });
+    // gallery options for ngx gallery 
     this.galleryOptions = [
       {
         width: '500px',
@@ -29,8 +42,10 @@ export class MemberDetailComponent implements OnInit {
         preview: false
       }
     ]
+    // loag gallery images
+    this.galleryImages = this.getImages();
 
-    
+
   }
   getImages(): NgxGalleryImage[] {
     const imageUrls = [];
@@ -44,12 +59,19 @@ export class MemberDetailComponent implements OnInit {
     return imageUrls;
   }
 
-  loadMember() {
-    this.membersService.getMember(this.route.snapshot.paramMap.get("username"))
-      .subscribe(user => {
-        this.member = user;
-      this.galleryImages = this.getImages();
-      })
-  }
 
+  loadMessages() {
+    this.messageService.getMessageThread(this.member.username).subscribe(messages => {
+      this.messages = messages;
+    })
+  }
+  selectTab(tabId: number) {
+    this.memberTabs.tabs[tabId].active = true;
+  }
+  onTabActivated(data: TabDirective) {
+    this.activeTab = data;
+    if (this.activeTab.heading == "Messages" && this.messages.length === 0) {
+      this.loadMessages();
+    }
+  }
 }
